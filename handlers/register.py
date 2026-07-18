@@ -212,12 +212,43 @@ async def receive_contract(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # 👇 این قسمت را تغییر نده
 register_handler = ConversationHandler(
+    register_handler = ConversationHandler(
     entry_points=[
-        ...
+        MessageHandler(
             filters.Regex("^✈️ ثبت نام دوره‌ها$"),
             register,
         )
     ],
+    states={
+        SELECT_COURSE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, select_course)
+        ],
+        FULL_NAME: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, full_name)
+        ],
+        PHONE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, phone)
+        ],
+        NATIONAL_CODE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, national_code)
+        ],
+        BIRTH_DATE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, birth_date)
+        ],
+        CITY: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, city)
+        ],
+        EDUCATION: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, education)
+        ],
+    },
+    fallbacks=[
+        MessageHandler(
+            filters.Regex("^لغو$"),
+            cancel,
+        )
+    ],
+)
     states={
         SELECT_COURSE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, select_course)
