@@ -3,10 +3,17 @@ import os
 from telegram.ext import (
     Application,
     CommandHandler,
+    MessageHandler,
+    filters,
 )
 
 from handlers.start import start
-from handlers.register import register_handler
+
+from handlers.register import (
+    register_handler,
+    receive_contract,
+)
+
 from handlers.contract import contract_handler
 
 from database import create_database
@@ -36,9 +43,17 @@ def main():
         register_handler
     )
 
-    # قرارداد آموزشی
+    # ارسال قرارداد
     app.add_handler(
         contract_handler
+    )
+
+    # دریافت قرارداد امضا شده
+    app.add_handler(
+        MessageHandler(
+            filters.Document.ALL | filters.PHOTO,
+            receive_contract,
+        )
     )
 
     print("✈️ Pooya Flight Registration Bot Started Successfully")
