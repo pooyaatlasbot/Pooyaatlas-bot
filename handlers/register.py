@@ -151,3 +151,46 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     return ConversationHandler.END
+    
+    register_handler = ConversationHandler(
+    entry_points=[
+        MessageHandler(
+            filters.Regex("^✈️ ثبت‌نام دوره‌ها$"),
+            register
+        )
+    ],
+
+    states={
+        SELECT_COURSE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, select_course)
+        ],
+
+        FULL_NAME: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, full_name)
+        ],
+
+        PHONE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, phone)
+        ],
+
+        NATIONAL_CODE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, national_code)
+        ],
+
+        BIRTH_DATE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, birth_date)
+        ],
+
+        CITY: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, city)
+        ],
+
+        EDUCATION: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, education)
+        ],
+    },
+
+    fallbacks=[
+        MessageHandler(filters.Regex("^لغو$"), cancel)
+    ],
+)
