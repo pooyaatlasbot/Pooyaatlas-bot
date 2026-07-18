@@ -30,7 +30,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text == "📞 تماس با مشاور":
         await update.message.reply_text(
             "📞 تماس با مشاور\n\n"
-            "09123456789"
+            "09124905605"
         )
 
     elif text == "💰 شهریه دوره‌ها":
