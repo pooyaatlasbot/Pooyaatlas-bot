@@ -15,7 +15,7 @@ from telegram.ext import ConversationHandler
     BIRTH_CERTIFICATE,
     EDUCATION_FILE,
     MEDICAL_FILE,
-    CONFIRM
+    FINISH,
 ) = range(15)
 
 END = ConversationHandler.END
