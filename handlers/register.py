@@ -174,9 +174,46 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
+# 👇 اینجا اضافه کن
+async def receive_contract(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user = update.effective_user
+
+    text = f"""
+📄 قرارداد جدید دریافت شد
+
+👤 نام:
+{user.full_name}
+
+🆔 آیدی:
+{user.id}
+"""
+
+    if update.message.document:
+
+        await context.bot.send_document(
+            chat_id=ADMIN_ID,
+            document=update.message.document.file_id,
+            caption=text,
+        )
+
+    elif update.message.photo:
+
+        await context.bot.send_photo(
+            chat_id=ADMIN_ID,
+            photo=update.message.photo[-1].file_id,
+            caption=text,
+        )
+
+    await update.message.reply_text(
+        "✅ قرارداد شما با موفقیت دریافت شد.\n\nپس از بررسی با شما تماس خواهیم گرفت."
+    )
+
+
+# 👇 این قسمت را تغییر نده
 register_handler = ConversationHandler(
     entry_points=[
-        MessageHandler(
+        ...
             filters.Regex("^✈️ ثبت نام دوره‌ها$"),
             register,
         )
