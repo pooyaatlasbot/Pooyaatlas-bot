@@ -33,7 +33,7 @@ DATABASE_NAME = "database/users.db"
 # ==========================
 # Contracts
 # ==========================
-CONTRACT_FILE = "contracts/contract.pdf"
+CONTRACT_FILE = "contracts/Contract.pdf"
 
 # ==========================
 # Upload Folders
