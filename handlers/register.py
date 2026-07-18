@@ -117,27 +117,11 @@ async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tracking_code = "PF-" + str(uuid.uuid4())[:8].upper()
 
     add_student(
-        tracking_code=tracking_code,
-        full_name=context.user_data["full_name"],
-        phone=context.user_data["phone"],
-        national_code=context.user_data["national_code"],
-        birth_date=context.user_data["birth_date"],
-        city=context.user_data["city"],
-        education=context.user_data["education"],
-        course=context.user_data["course"],
-        has_flight_experience="خیر",
+        ...
     )
 
     await update.message.reply_text(
-        f"""
-✅ ثبت‌نام اولیه شما با موفقیت انجام شد.
-
-🆔 کد رهگیری شما:
-
-{tracking_code}
-
-به‌زودی قرارداد آموزشی برای شما ارسال خواهد شد.
-"""
+        ...
     )
 
     return ConversationHandler.END
