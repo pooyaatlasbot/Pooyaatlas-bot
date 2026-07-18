@@ -1,7 +1,4 @@
-from telegram import (
-    Update,
-    ReplyKeyboardMarkup,
-)
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
     ContextTypes,
     ConversationHandler,
@@ -9,7 +6,15 @@ from telegram.ext import (
     filters,
 )
 
-from states import *
+from states import (
+    SELECT_COURSE,
+    FULL_NAME,
+    PHONE,
+    NATIONAL_CODE,
+    BIRTH_DATE,
+    CITY,
+    EDUCATION,
+)
 
 # -----------------------
 # شروع ثبت نام
@@ -28,8 +33,8 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True,
-            one_time_keyboard=True
-        )
+            one_time_keyboard=True,
+        ),
     )
 
     return SELECT_COURSE
@@ -44,14 +49,14 @@ async def select_course(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["course"] = update.message.text
 
     await update.message.reply_text(
-        "نام و نام خانوادگی خود را وارد کنید:"
+        "👤 نام و نام خانوادگی خود را وارد کنید:"
     )
 
     return FULL_NAME
 
 
 # -----------------------
-# نام
+# نام و نام خانوادگی
 # -----------------------
 
 async def full_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -59,14 +64,14 @@ async def full_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["full_name"] = update.message.text
 
     await update.message.reply_text(
-        "شماره موبایل:"
+        "📱 شماره موبایل خود را وارد کنید:"
     )
 
     return PHONE
 
 
 # -----------------------
-# موبایل
+# شماره موبایل
 # -----------------------
 
 async def phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -74,7 +79,7 @@ async def phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["phone"] = update.message.text
 
     await update.message.reply_text(
-        "کد ملی:"
+        "🆔 کد ملی خود را وارد کنید:"
     )
 
     return NATIONAL_CODE
@@ -89,7 +94,7 @@ async def national_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["national_code"] = update.message.text
 
     await update.message.reply_text(
-        "تاریخ تولد:"
+        "📅 تاریخ تولد را وارد کنید:"
     )
 
     return BIRTH_DATE
@@ -104,7 +109,7 @@ async def birth_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["birth_date"] = update.message.text
 
     await update.message.reply_text(
-        "شهر محل سکونت:"
+        "🏙 شهر محل سکونت را وارد کنید:"
     )
 
     return CITY
@@ -119,14 +124,14 @@ async def city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["city"] = update.message.text
 
     await update.message.reply_text(
-        "آخرین مدرک تحصیلی:"
+        "🎓 آخرین مدرک تحصیلی را وارد کنید:"
     )
 
     return EDUCATION
 
 
 # -----------------------
-# مدرک
+# مدرک تحصیلی
 # -----------------------
 
 async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -134,63 +139,63 @@ async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["education"] = update.message.text
 
     await update.message.reply_text(
-        "✅ اطلاعات اولیه ثبت شد."
+        "✅ اطلاعات اولیه شما ثبت شد."
     )
 
     return ConversationHandler.END
 
 
 # -----------------------
-# لغو
+# لغو ثبت نام
 # -----------------------
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
-        "ثبت نام لغو شد."
+        "❌ ثبت‌نام لغو شد."
     )
 
     return ConversationHandler.END
-    
-    register_handler = ConversationHandler(
+
+
+# -----------------------
+# Conversation Handler
+# -----------------------
+
+register_handler = ConversationHandler(
     entry_points=[
         MessageHandler(
-            filters.Regex("^✈️ ثبت‌نام دوره‌ها$"),
-            register
+            filters.Regex("^✈️ ثبت نام دوره‌ها$"),
+            register,
         )
     ],
-
     states={
         SELECT_COURSE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, select_course)
         ],
-
         FULL_NAME: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, full_name)
         ],
-
         PHONE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, phone)
         ],
-
         NATIONAL_CODE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, national_code)
         ],
-
         BIRTH_DATE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, birth_date)
         ],
-
         CITY: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, city)
         ],
-
         EDUCATION: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, education)
         ],
     },
-
     fallbacks=[
-        MessageHandler(filters.Regex("^لغو$"), cancel)
+        MessageHandler(
+            filters.Regex("^لغو$"),
+            cancel,
+        )
     ],
 )
