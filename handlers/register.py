@@ -109,7 +109,6 @@ async def city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return EDUCATION
 
-
 async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["education"] = update.message.text
@@ -117,15 +116,53 @@ async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tracking_code = "PF-" + str(uuid.uuid4())[:8].upper()
 
     add_student(
-        ...
+        tracking_code=tracking_code,
+        full_name=context.user_data["full_name"],
+        phone=context.user_data["phone"],
+        national_code=context.user_data["national_code"],
+        birth_date=context.user_data["birth_date"],
+        city=context.user_data["city"],
+        education=context.user_data["education"],
+        course=context.user_data["course"],
+        has_flight_experience="خیر",
     )
 
     await update.message.reply_text(
-        ...
+        f"""
+✅ ثبت‌نام اولیه شما با موفقیت انجام شد.
+
+🆔 کد رهگیری شما:
+
+{tracking_code}
+"""
     )
 
-    return ConversationHandler.END
+    if os.path.exists(CONTRACT_FILE):
 
+        with open(CONTRACT_FILE, "rb") as pdf:
+
+            await update.message.reply_document(
+                document=pdf,
+                filename="PooyaFlight-Contract.pdf",
+                caption="""
+📄 قرارداد آموزشگاه پویا فلایت
+
+لطفاً قرارداد را دانلود کنید.
+
+پس از مطالعه و امضا، فایل یا عکس قرارداد امضا شده را از طریق همین ربات ارسال نمایید.
+
+با تشکر
+آموزشگاه خلبانی پویا فلایت
+"""
+            )
+
+    else:
+
+        await update.message.reply_text(
+            "❌ فایل قرارداد روی سرور پیدا نشد."
+        )
+
+    return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
