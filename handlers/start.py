@@ -23,3 +23,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """,
         reply_markup=reply_markup
     )
+    async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    text = update.message.text
+
+    if text == "📞 تماس با مشاور":
+        await update.message.reply_text(
+            "📞 تماس با مشاور\n\n"
+            "09123456789"
+        )
+
+    elif text == "💰 شهریه دوره‌ها":
+        await update.message.reply_text(
+            "برای اطلاع از شهریه‌ها با آموزشگاه تماس بگیرید."
+        )
+
+    elif text == "📄 قرارداد آموزشی":
+        await update.message.reply_text(
+            "برای دریافت قرارداد ابتدا ثبت‌نام اولیه را انجام دهید."
+        )
