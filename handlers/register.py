@@ -24,16 +24,6 @@ from states import (
     EDUCATION,
 )
 
-from states import (
-    SELECT_COURSE,
-    FULL_NAME,
-    PHONE,
-    NATIONAL_CODE,
-    BIRTH_DATE,
-    CITY,
-    EDUCATION,
-)
-
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
