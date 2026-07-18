@@ -13,8 +13,8 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 def main():
 
-    if not BOT_TOKEN:
-        raise ValueError("BOT_TOKEN تنظیم نشده است.")
+    if BOT_TOKEN is None:
+        raise ValueError("BOT_TOKEN پیدا نشد.")
 
     create_database()
 
