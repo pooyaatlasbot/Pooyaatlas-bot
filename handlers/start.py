@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     keyboard = [
         ["✈️ ثبت نام دوره‌ها"],
         ["📄 قرارداد آموزشی"],
@@ -12,30 +13,31 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply_markup = ReplyKeyboardMarkup(
         keyboard,
-        resize_keyboard=True
+        resize_keyboard=True,
     )
 
     await update.message.reply_text(
-        f"""
+        """
 ✈️ به سامانه ثبت‌نام آموزشگاه خلبانی پویا فلایت خوش آمدید.
 
 از منوی زیر یکی از گزینه‌ها را انتخاب کنید.
-        """,
-        reply_markup=reply_markup
+""",
+        reply_markup=reply_markup,
     )
-    async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text
 
     if text == "📞 تماس با مشاور":
         await update.message.reply_text(
-            "📞 تماس با مشاور\n\n"
-            "09124905605"
+            "📞 شماره مشاور:\n09123456789"
         )
 
     elif text == "💰 شهریه دوره‌ها":
         await update.message.reply_text(
-            "برای اطلاع از شهریه‌ها با آموزشگاه تماس بگیرید."
+            "برای اطلاع از شهریه با آموزشگاه تماس بگیرید."
         )
 
     elif text == "📄 قرارداد آموزشی":
