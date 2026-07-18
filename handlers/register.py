@@ -9,6 +9,10 @@ from telegram.ext import (
 import uuid
 
 import os
+
+from config import ADMIN_ID
+
+import os
 from config import CONTRACT_FILE
 
 from database import add_student
