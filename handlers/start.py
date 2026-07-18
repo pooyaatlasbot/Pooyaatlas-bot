@@ -32,7 +32,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if text == "📞 تماس با مشاور":
         await update.message.reply_text(
-            "📞 شماره مشاور:\n09123456789"
+            "📞 شماره مشاور:\n09124905605"
         )
 
     elif text == "💰 شهریه دوره‌ها":
