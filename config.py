@@ -12,18 +12,18 @@ SCHOOL_NAME = "آموزشگاه خلبانی پویا فلایت"
 
 WEBSITE = "https://pooyaflight.ir"
 
-PHONE = "+98XXXXXXXXXX"
+PHONE = "+989120155688"
 
 ADDRESS = """
-تهران
-(آدرس آموزشگاه را اینجا وارد کنید)
+کرج
+( بلوار مطهری شمالی بین خیابان پیروزی و آزادی ساختمان وکلا پ ۱۶۶ واحد ۳ جنب هلسی لند)
 """
 
 # ==========================
 # Admin
 # ==========================
 # شناسه عددی تلگرام مدیر
-ADMIN_ID = 123456789
+ADMIN_ID = 5679516922
 
 # ==========================
 # Database
@@ -42,7 +42,7 @@ PHOTO_FOLDER = "uploads/photos"
 NATIONAL_CARD_FOLDER = "uploads/national_cards"
 BIRTH_CERTIFICATE_FOLDER = "uploads/birth_certificates"
 EDUCATION_FOLDER = "uploads/education"
-MEDICAL_FOLDER = "uploads/medical"
+
 
 # ==========================
 # Tracking Code
