@@ -6,6 +6,10 @@ from telegram.ext import (
     filters,
 )
 
+import uuid
+
+from database import add_student
+
 from states import (
     SELECT_COURSE,
     FULL_NAME,
@@ -16,9 +20,6 @@ from states import (
     EDUCATION,
 )
 
-# -----------------------
-# شروع ثبت نام
-# -----------------------
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -29,7 +30,7 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_text(
-        "لطفاً دوره مورد نظر خود را انتخاب کنید:",
+        "لطفاً دوره مورد نظر خود را انتخاب کنید.",
         reply_markup=ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True,
@@ -40,114 +41,104 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return SELECT_COURSE
 
 
-# -----------------------
-# انتخاب دوره
-# -----------------------
-
 async def select_course(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["course"] = update.message.text
 
     await update.message.reply_text(
-        "👤 نام و نام خانوادگی خود را وارد کنید:"
+        "👤 نام و نام خانوادگی:"
     )
 
     return FULL_NAME
 
-
-# -----------------------
-# نام و نام خانوادگی
-# -----------------------
 
 async def full_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["full_name"] = update.message.text
 
     await update.message.reply_text(
-        "📱 شماره موبایل خود را وارد کنید:"
+        "📱 شماره موبایل:"
     )
 
     return PHONE
 
-
-# -----------------------
-# شماره موبایل
-# -----------------------
 
 async def phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["phone"] = update.message.text
 
     await update.message.reply_text(
-        "🆔 کد ملی خود را وارد کنید:"
+        "🪪 کد ملی:"
     )
 
     return NATIONAL_CODE
 
-
-# -----------------------
-# کد ملی
-# -----------------------
 
 async def national_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["national_code"] = update.message.text
 
     await update.message.reply_text(
-        "📅 تاریخ تولد را وارد کنید:"
+        "📅 تاریخ تولد:"
     )
 
     return BIRTH_DATE
 
-
-# -----------------------
-# تاریخ تولد
-# -----------------------
 
 async def birth_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["birth_date"] = update.message.text
 
     await update.message.reply_text(
-        "🏙 شهر محل سکونت را وارد کنید:"
+        "🏙 شهر محل سکونت:"
     )
 
     return CITY
 
-
-# -----------------------
-# شهر
-# -----------------------
 
 async def city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["city"] = update.message.text
 
     await update.message.reply_text(
-        "🎓 آخرین مدرک تحصیلی را وارد کنید:"
+        "🎓 آخرین مدرک تحصیلی:"
     )
 
     return EDUCATION
 
 
-# -----------------------
-# مدرک تحصیلی
-# -----------------------
-
 async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["education"] = update.message.text
 
+    tracking_code = "PF-" + str(uuid.uuid4())[:8].upper()
+
+    add_student(
+        tracking_code=tracking_code,
+        full_name=context.user_data["full_name"],
+        phone=context.user_data["phone"],
+        national_code=context.user_data["national_code"],
+        birth_date=context.user_data["birth_date"],
+        city=context.user_data["city"],
+        education=context.user_data["education"],
+        course=context.user_data["course"],
+        has_flight_experience="خیر",
+    )
+
     await update.message.reply_text(
-        "✅ اطلاعات اولیه شما ثبت شد."
+        f"""
+✅ ثبت‌نام اولیه شما با موفقیت انجام شد.
+
+🆔 کد رهگیری شما:
+
+{tracking_code}
+
+به‌زودی قرارداد آموزشی برای شما ارسال خواهد شد.
+"""
     )
 
     return ConversationHandler.END
 
-
-# -----------------------
-# لغو ثبت نام
-# -----------------------
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -157,10 +148,6 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
 
-
-# -----------------------
-# Conversation Handler
-# -----------------------
 
 register_handler = ConversationHandler(
     entry_points=[
