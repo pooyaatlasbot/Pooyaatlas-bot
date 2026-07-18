@@ -7,7 +7,7 @@ from telegram.ext import (
     filters,
 )
 
-from handlers.start import start
+from handlers.start import start, menu
 
 from handlers.register import (
     register_handler,
