@@ -1,3 +1,5 @@
+from config import PHONE, WEBSITE
+
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 
