@@ -12,7 +12,7 @@ SCHOOL_NAME = "آموزشگاه خلبانی پویا فلایت"
 
 WEBSITE = "https://pooyaflight.ir"
 
-PHONE = "+989120155688"
+PHONE = "09124905605"
 
 ADDRESS = """
 کرج
