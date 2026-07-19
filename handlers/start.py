@@ -33,16 +33,35 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
 
     if text == "📞 تماس با مشاور":
+
         await update.message.reply_text(
-            "📞 شماره مشاور:\n09124905605"
+            f"""
+📞 تماس با مشاور
+
+☎️ شماره تماس:
+{PHONE}
+
+🌐 وب‌سایت:
+{WEBSITE}
+
+در ساعات اداری پاسخگوی شما هستیم.
+"""
         )
 
     elif text == "💰 شهریه دوره‌ها":
+
         await update.message.reply_text(
-            "برای اطلاع از شهریه با آموزشگاه تماس بگیرید."
+            f"""
+💰 شهریه دوره‌ها
+
+جهت اطلاع از آخرین شهریه‌ها لطفاً با مشاوران آموزشگاه تماس بگیرید.
+
+☎️ {PHONE}
+"""
         )
 
     elif text == "📄 قرارداد آموزشی":
+
         await update.message.reply_text(
             "برای دریافت قرارداد ابتدا ثبت‌نام اولیه را انجام دهید."
         )
