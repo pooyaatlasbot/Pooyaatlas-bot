@@ -48,6 +48,27 @@ def main():
         contract_handler
     )
 
+# منوی اصلی
+app.add_handler(
+    MessageHandler(
+        filters.Regex("^📞 تماس با مشاور$"),
+        menu,
+    )
+)
+
+app.add_handler(
+    MessageHandler(
+        filters.Regex("^💰 شهریه دوره‌ها$"),
+        menu,
+    )
+)
+
+app.add_handler(
+    MessageHandler(
+        filters.Regex("^📄 قرارداد آموزشی$"),
+        menu,
+    )
+)
     # دریافت قرارداد امضا شده
     app.add_handler(
         MessageHandler(
