@@ -47,6 +47,8 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def select_course(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    print(">>> SELECT COURSE")
+
     context.user_data["course"] = update.message.text
 
     await update.message.reply_text(
@@ -57,6 +59,8 @@ async def select_course(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def full_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    print(">>> FULL NAME")
 
     context.user_data["full_name"] = update.message.text
 
@@ -101,6 +105,8 @@ async def birth_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def city(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    print(">>> CITY")
 
     context.user_data["city"] = update.message.text
 
