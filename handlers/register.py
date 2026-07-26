@@ -1,127 +1,10 @@
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
-    ContextTypes,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
-
-import uuid
-import os
-
-from config import ADMIN_ID
-from config import CONTRACT_FILE
-
-from database import add_student
-
-from states import (
-    SELECT_COURSE,
-    FULL_NAME,
-    PHONE,
-    NATIONAL_CODE,
-    BIRTH_DATE,
-    CITY,
-    EDUCATION,
-)
-
-
-async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    keyboard = [
-        ["✈️ دوره مقدماتی UL-PPL"],
-        ["🛫 دوره پیشرفته UL-CPL"],
-        ["👨‍✈️ استاد خلبانی UL-IP"],
-    ]
-
-    await update.message.reply_text(
-        "لطفاً دوره مورد نظر خود را انتخاب کنید.",
-        reply_markup=ReplyKeyboardMarkup(
-            keyboard,
-            resize_keyboard=True,
-            one_time_keyboard=True,
-        ),
-    )
-
-    return SELECT_COURSE
-
-
-async def select_course(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    print(">>> SELECT COURSE")
-
-    context.user_data["course"] = update.message.text
-
-    await update.message.reply_text(
-        "👤 نام و نام خانوادگی:"
-    )
-
-    return FULL_NAME
-
-
-async def full_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    print(">>> FULL NAME")
-
-    context.user_data["full_name"] = update.message.text
-
-    await update.message.reply_text(
-        "📱 شماره موبایل:"
-    )
-
-    return PHONE
-
-
-async def phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    context.user_data["phone"] = update.message.text
-
-    await update.message.reply_text(
-        "🪪 کد ملی:"
-    )
-
-    return NATIONAL_CODE
-
-
-async def national_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    context.user_data["national_code"] = update.message.text
-
-    await update.message.reply_text(
-        "📅 تاریخ تولد:"
-    )
-
-    return BIRTH_DATE
-
-
-async def birth_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    context.user_data["birth_date"] = update.message.text
-
-    await update.message.reply_text(
-        "🏙 شهر محل سکونت:"
-    )
-
-    return CITY
-
-
-async def city(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    print(">>> CITY")
-
-    context.user_data["city"] = update.message.text
-
-    await update.message.reply_text(
-        "🎓 آخرین مدرک تحصیلی:"
-    )
-
-    return EDUCATION
-
 async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["education"] = update.message.text
 
     tracking_code = "PF-" + str(uuid.uuid4())[:8].upper()
 
+    # ذخیره اطلاعات در دیتابیس
     add_student(
         tracking_code=tracking_code,
         full_name=context.user_data["full_name"],
@@ -134,6 +17,54 @@ async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
         has_flight_experience="خیر",
     )
 
+    # اطلاعات کامل ثبت نام کننده برای ادمین
+    admin_text = f"""
+🆕 ثبت‌نام جدید در آموزشگاه پویا فلایت
+
+━━━━━━━━━━━━━━
+
+🆔 کد رهگیری:
+{tracking_code}
+
+👤 نام و نام خانوادگی:
+{context.user_data["full_name"]}
+
+📱 شماره موبایل:
+{context.user_data["phone"]}
+
+🪪 کد ملی:
+{context.user_data["national_code"]}
+
+📅 تاریخ تولد:
+{context.user_data["birth_date"]}
+
+🏙 شهر محل سکونت:
+{context.user_data["city"]}
+
+🎓 آخرین مدرک تحصیلی:
+{context.user_data["education"]}
+
+✈️ دوره انتخابی:
+{context.user_data["course"]}
+
+👤 نام تلگرام:
+{update.effective_user.full_name}
+
+🆔 Telegram ID:
+{update.effective_user.id}
+
+━━━━━━━━━━━━━━
+
+✅ ثبت‌نام اولیه با موفقیت انجام شد.
+"""
+
+    # ارسال اطلاعات کامل به ادمین
+    await context.bot.send_message(
+        chat_id=ADMIN_ID,
+        text=admin_text,
+    )
+
+    # پیام به ثبت نام کننده
     await update.message.reply_text(
         f"""
 ✅ ثبت‌نام اولیه شما با موفقیت انجام شد.
@@ -144,6 +75,7 @@ async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """
     )
 
+    # ارسال قرارداد
     if os.path.exists(CONTRACT_FILE):
 
         with open(CONTRACT_FILE, "rb") as pdf:
@@ -170,85 +102,3 @@ async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     return ConversationHandler.END
-
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    await update.message.reply_text(
-        "❌ ثبت‌نام لغو شد."
-    )
-
-    return ConversationHandler.END
-
-
-# 👇 اینجا اضافه کن
-async def receive_contract(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    user = update.effective_user
-
-    text = f"""
-📄 قرارداد جدید دریافت شد
-
-👤 نام:
-{user.full_name}
-
-🆔 آیدی:
-{user.id}
-"""
-
-    if update.message.document:
-
-        await context.bot.send_document(
-            chat_id=ADMIN_ID,
-            document=update.message.document.file_id,
-            caption=text,
-        )
-
-    elif update.message.photo:
-
-        await context.bot.send_photo(
-            chat_id=ADMIN_ID,
-            photo=update.message.photo[-1].file_id,
-            caption=text,
-        )
-
-    await update.message.reply_text(
-        "✅ قرارداد شما با موفقیت دریافت شد.\n\nپس از بررسی با شما تماس خواهیم گرفت."
-    )
-
-register_handler = ConversationHandler(
-    entry_points=[
-        MessageHandler(
-            filters.Regex("^✈️ ثبت نام دوره‌ها$"),
-            register,
-        )
-    ],
-    states={
-        SELECT_COURSE: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, select_course)
-        ],
-        FULL_NAME: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, full_name)
-        ],
-        PHONE: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, phone)
-        ],
-        NATIONAL_CODE: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, national_code)
-        ],
-        BIRTH_DATE: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, birth_date)
-        ],
-        CITY: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, city)
-        ],
-        EDUCATION: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, education)
-        ],
-    },
-    fallbacks=[
-        MessageHandler(
-            filters.Regex("^لغو$"),
-            cancel,
-        )
-    ],
-)
