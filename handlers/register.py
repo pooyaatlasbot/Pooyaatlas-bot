@@ -1,3 +1,13 @@
+import os
+import uuid
+
+from telegram import Update
+from telegram.ext import ContextTypes, ConversationHandler
+
+from database import add_student
+from config import ADMIN_ID, CONTRACT_FILE
+
+
 async def education(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["education"] = update.message.text
