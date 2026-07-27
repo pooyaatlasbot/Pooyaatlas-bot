@@ -523,7 +523,7 @@ async def receive_contract(
 register_handler = ConversationHandler(
     entry_points=[
         MessageHandler(
-            filters.Regex("^📝 ثبت‌نام$"),
+          filters.Regex("^✈️ ثبت نام دوره‌ها$")
             start_register
         )
     ],
