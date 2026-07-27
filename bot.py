@@ -33,30 +33,24 @@ def main():
     # ساخت برنامه
     app = Application.builder().token(BOT_TOKEN).build()
 
+    # ==============================
     # دستور /start
+    # ==============================
     app.add_handler(
         CommandHandler("start", start)
     )
 
+    # ==============================
     # فرم ثبت نام
+    # ==============================
     app.add_handler(
         register_handler
     )
 
-    # قرارداد آموزشی
-    app.add_handler(
-        contract_handler
-    )
-
-    # منوی اصلی
-    app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            menu,
-        )
-    )
-
+    # ==============================
     # دریافت قرارداد امضا شده
+    # باید قبل از menu قرار بگیرد
+    # ==============================
     app.add_handler(
         MessageHandler(
             filters.Document.ALL | filters.PHOTO,
@@ -64,7 +58,27 @@ def main():
         )
     )
 
-    print("✈️ Pooya Flight Registration Bot Started Successfully")
+    # ==============================
+    # قرارداد آموزشی
+    # ==============================
+    app.add_handler(
+        contract_handler
+    )
+
+    # ==============================
+    # منوی اصلی
+    # باید آخرین MessageHandler باشد
+    # ==============================
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            menu,
+        )
+    )
+
+    print(
+        "✈️ Pooya Flight Registration Bot Started Successfully"
+    )
 
     # اجرای ربات
     app.run_polling()
