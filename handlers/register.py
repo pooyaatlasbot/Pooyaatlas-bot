@@ -1,4 +1,3 @@
-```python
 import os
 import uuid
 
@@ -30,121 +29,21 @@ async def start_register(
     context: ContextTypes.DEFAULT_TYPE
 ):
 
-    await update.message.reply_text(
-        """
-📝 ثبت‌نام در آموزشگاه خلبانی پویا فلایت
-
-لطفاً نام و نام خانوادگی خود را وارد کنید:
-"""
-    )
-
-    return FULL_NAME
-
-
-# =========================================================
-# دریافت نام و نام خانوادگی
-# =========================================================
-
-async def full_name(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    context.user_data["full_name"] = update.message.text
+    keyboard = [
+        ["✈️ دوره مقدماتی UL-PPL"],
+        ["🛫 دوره پیشرفته UL-CPL"],
+        ["👨‍✈️ استاد خلبانی UL-IP"],
+    ]
 
     await update.message.reply_text(
-        """
-📱 لطفاً شماره تماس خود را وارد کنید:
-
-مثال:
-09123456789
-"""
-    )
-
-    return PHONE
-
-
-# =========================================================
-# دریافت شماره تماس
-# =========================================================
-
-async def phone(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    context.user_data["phone"] = update.message.text
-
-    await update.message.reply_text(
-        """
-🪪 لطفاً کد ملی خود را وارد کنید:
-"""
-    )
-
-    return NATIONAL_CODE
-
-
-# =========================================================
-# دریافت کد ملی
-# =========================================================
-
-async def national_code(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    context.user_data["national_code"] = update.message.text
-
-    await update.message.reply_text(
-        """
-📅 لطفاً تاریخ تولد خود را وارد کنید:
-
-مثال:
-1370/01/15
-"""
-    )
-
-    return BIRTH_DATE
-
-
-# =========================================================
-# دریافت تاریخ تولد
-# =========================================================
-
-async def birth_date(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    context.user_data["birth_date"] = update.message.text
-
-    await update.message.reply_text(
-        """
-🏙 لطفاً شهر محل سکونت خود را وارد کنید:
-"""
-    )
-
-    return CITY
-
-
-# =========================================================
-# دریافت شهر
-# =========================================================
-
-async def city(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    context.user_data["city"] = update.message.text
-
-    await update.message.reply_text(
-        """
-✈️ لطفاً دوره مورد نظر خود را وارد کنید:
-
-مثال:
-آموزش خلبانی فوق سبک
-"""
+        "لطفاً دوره مورد نظر خود را انتخاب کنید:",
+        reply_markup=__import__(
+            "telegram"
+        ).ReplyKeyboardMarkup(
+            keyboard,
+            resize_keyboard=True,
+            one_time_keyboard=True,
+        ),
     )
 
     return COURSE
@@ -162,16 +61,108 @@ async def course(
     context.user_data["course"] = update.message.text
 
     await update.message.reply_text(
-        """
-🎓 لطفاً آخرین مدرک تحصیلی خود را وارد کنید:
-"""
+        "👤 لطفاً نام و نام خانوادگی خود را وارد کنید:"
+    )
+
+    return FULL_NAME
+
+
+# =========================================================
+# دریافت نام
+# =========================================================
+
+async def full_name(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    context.user_data["full_name"] = update.message.text
+
+    await update.message.reply_text(
+        "📱 لطفاً شماره تماس خود را وارد کنید:\n\n"
+        "مثال:\n"
+        "09123456789"
+    )
+
+    return PHONE
+
+
+# =========================================================
+# دریافت شماره تماس
+# =========================================================
+
+async def phone(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    context.user_data["phone"] = update.message.text
+
+    await update.message.reply_text(
+        "🪪 لطفاً کد ملی خود را وارد کنید:"
+    )
+
+    return NATIONAL_CODE
+
+
+# =========================================================
+# دریافت کد ملی
+# =========================================================
+
+async def national_code(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    context.user_data["national_code"] = update.message.text
+
+    await update.message.reply_text(
+        "📅 لطفاً تاریخ تولد خود را وارد کنید:\n\n"
+        "مثال:\n"
+        "1370/01/15"
+    )
+
+    return BIRTH_DATE
+
+
+# =========================================================
+# دریافت تاریخ تولد
+# =========================================================
+
+async def birth_date(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    context.user_data["birth_date"] = update.message.text
+
+    await update.message.reply_text(
+        "🏙 لطفاً شهر محل سکونت خود را وارد کنید:"
+    )
+
+    return CITY
+
+
+# =========================================================
+# دریافت شهر
+# =========================================================
+
+async def city(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    context.user_data["city"] = update.message.text
+
+    await update.message.reply_text(
+        "🎓 لطفاً آخرین مدرک تحصیلی خود را وارد کنید:"
     )
 
     return EDUCATION
 
 
 # =========================================================
-# دریافت مدرک تحصیلی و تکمیل ثبت نام
+# دریافت مدرک و تکمیل ثبت نام
 # =========================================================
 
 async def education(
@@ -179,16 +170,20 @@ async def education(
     context: ContextTypes.DEFAULT_TYPE
 ):
 
-    # ذخیره مدرک تحصیلی
     context.user_data["education"] = update.message.text
 
     # ساخت کد رهگیری
-    tracking_code = "PF-" + str(uuid.uuid4())[:8].upper()
+    tracking_code = (
+        "PF-" +
+        str(uuid.uuid4())[:8].upper()
+    )
 
-    # ذخیره کد رهگیری
     context.user_data["tracking_code"] = tracking_code
 
-    # دریافت اطلاعات ثبت نام کننده
+    # =====================================================
+    # اطلاعات ثبت نام کننده
+    # =====================================================
+
     full_name = context.user_data.get(
         "full_name",
         "ثبت نشده"
@@ -224,42 +219,70 @@ async def education(
         "ثبت نشده"
     )
 
-    # اطلاعات حساب تلگرام
-    telegram_name = (
-        update.effective_user.full_name
-        if update.effective_user
-        else "ثبت نشده"
-    )
+    # =====================================================
+    # اطلاعات تلگرام
+    # =====================================================
 
-    telegram_username = (
-        f"@{update.effective_user.username}"
-        if update.effective_user
-        and update.effective_user.username
-        else "ندارد"
-    )
+    telegram_name = "ثبت نشده"
+    telegram_username = "ندارد"
+    telegram_id = "ثبت نشده"
 
-    telegram_id = (
-        update.effective_user.id
-        if update.effective_user
-        else "ثبت نشده"
-    )
+    if update.effective_user:
 
-    # ذخیره اطلاعات در دیتابیس
-    add_student(
-        tracking_code=tracking_code,
-        full_name=full_name,
-        phone=phone_number,
-        national_code=national_code_value,
-        birth_date=birth_date_value,
-        city=city_value,
-        education=education_value,
-        course=course_value,
-        has_flight_experience="خیر",
-    )
+        telegram_name = (
+            update.effective_user.full_name
+        )
 
+        telegram_id = (
+            update.effective_user.id
+        )
+
+        if update.effective_user.username:
+
+            telegram_username = (
+                "@"
+                + update.effective_user.username
+            )
+
+    # =====================================================
+    # ذخیره در دیتابیس
+    # =====================================================
+
+    try:
+
+        add_student(
+            tracking_code=tracking_code,
+            full_name=full_name,
+            phone=phone_number,
+            national_code=national_code_value,
+            birth_date=birth_date_value,
+            city=city_value,
+            education=education_value,
+            course=course_value,
+            has_flight_experience="خیر",
+        )
+
+    except Exception as e:
+
+        print(
+            "DATABASE ERROR:",
+            e
+        )
+
+        await update.message.reply_text(
+            "❌ خطایی در ذخیره اطلاعات ثبت‌نام رخ داد.\n"
+            "لطفاً دوباره تلاش کنید."
+        )
+
+        return ConversationHandler.END
+
+    # =====================================================
     # پیام کامل برای ادمین
+    # =====================================================
+
     admin_text = f"""
-🆕 ثبت‌نام جدید در آموزشگاه پویا فلایت
+🆕 ثبت‌نام جدید
+✈️ آموزشگاه خلبانی پویا فلایت
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -269,7 +292,7 @@ async def education(
 👤 نام و نام خانوادگی:
 {full_name}
 
-📱 شماره تماس ثبت‌نام‌کننده:
+📱 شماره تماس:
 {phone_number}
 
 🪪 کد ملی:
@@ -291,10 +314,10 @@ async def education(
 
 📱 اطلاعات حساب تلگرام
 
-👤 نام:
+👤 نام تلگرام:
 {telegram_name}
 
-🔗 نام کاربری:
+🔗 Username:
 {telegram_username}
 
 🆔 Telegram ID:
@@ -302,23 +325,38 @@ async def education(
 
 ━━━━━━━━━━━━━━━━━━
 
-✅ ثبت‌نام اولیه با موفقیت انجام شد.
+✅ اطلاعات ثبت‌نام در دیتابیس ذخیره شد.
 """
 
-    # ارسال اطلاعات برای ادمین
-    await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=admin_text,
-    )
+    # =====================================================
+    # ارسال اطلاعات کامل برای ادمین
+    # =====================================================
 
-    # پیام موفقیت به کاربر
+    try:
+
+        await context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=admin_text,
+        )
+
+    except Exception as e:
+
+        print(
+            "ADMIN MESSAGE ERROR:",
+            e
+        )
+
+    # =====================================================
+    # پیام موفقیت برای متقاضی
+    # =====================================================
+
     await update.message.reply_text(
         f"""
 ✅ ثبت‌نام اولیه شما با موفقیت انجام شد.
 
 ━━━━━━━━━━━━━━━━━━
 
-🆔 کد رهگیری:
+🆔 کد رهگیری شما:
 
 {tracking_code}
 
@@ -328,27 +366,36 @@ async def education(
 
 ━━━━━━━━━━━━━━━━━━
 
-📄 قرارداد آموزشگاه برای شما ارسال می‌شود.
+📄 قرارداد آموزشی برای شما ارسال می‌شود.
 
-لطفاً قرارداد را دانلود و مطالعه کنید.
+لطفاً قرارداد را دانلود، مطالعه و امضا کنید.
 
-✍️ پس از مطالعه و امضا، لطفاً قرارداد امضاشده را به صورت عکس یا فایل PDF از طریق همین ربات ارسال نمایید.
+✍️ سپس قرارداد امضاشده را به صورت عکس یا فایل PDF
+از طریق همین ربات ارسال نمایید.
 
-با تشکر
 ✈️ آموزشگاه خلبانی پویا فلایت
 """
     )
 
+    # =====================================================
     # ارسال قرارداد
+    # =====================================================
+
     if os.path.exists(CONTRACT_FILE):
 
-        with open(CONTRACT_FILE, "rb") as pdf:
+        try:
 
-            await update.message.reply_document(
-                document=pdf,
-                filename="PooyaFlight-Contract.pdf",
-                caption="""
-📄 قرارداد آموزشگاه خلبانی پویا فلایت
+            with open(
+                CONTRACT_FILE,
+                "rb"
+            ) as pdf:
+
+                await update.message.reply_document(
+                    document=pdf,
+                    filename="PooyaFlight-Contract.pdf",
+                    caption="""
+📄 قرارداد آموزشی
+آموزشگاه خلبانی پویا فلایت
 
 لطفاً قرارداد را دانلود و مطالعه کنید.
 
@@ -361,21 +408,37 @@ async def education(
 📄 به صورت فایل PDF
 
 از طریق همین ربات ارسال نمایید.
-
-با تشکر
-✈️ آموزشگاه خلبانی پویا فلایت
 """
+                )
+
+        except Exception as e:
+
+            print(
+                "CONTRACT ERROR:",
+                e
             )
 
     else:
 
         await update.message.reply_text(
-            """
-❌ فایل قرارداد روی سرور پیدا نشد.
-
-لطفاً با پشتیبانی آموزشگاه پویا فلایت تماس بگیرید.
-"""
+            "❌ فایل قرارداد روی سرور پیدا نشد."
         )
+
+    return ConversationHandler.END
+
+
+# =========================================================
+# لغو ثبت نام
+# =========================================================
+
+async def cancel(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    await update.message.reply_text(
+        "❌ ثبت‌نام لغو شد."
+    )
 
     return ConversationHandler.END
 
@@ -404,23 +467,25 @@ async def receive_contract(
         "ثبت نشده"
     )
 
-    telegram_id = update.effective_user.id
-
-    telegram_username = (
-        f"@{update.effective_user.username}"
-        if update.effective_user.username
-        else "ندارد"
+    telegram_id = (
+        update.effective_user.id
+        if update.effective_user
+        else "ثبت نشده"
     )
 
-    # اگر PDF ارسال شده باشد
-    if update.message.document:
+    telegram_username = "ندارد"
 
-        document = update.message.document
+    if (
+        update.effective_user
+        and update.effective_user.username
+    ):
 
-        await context.bot.send_document(
-            chat_id=ADMIN_ID,
-            document=document.file_id,
-            caption=f"""
+        telegram_username = (
+            "@"
+            + update.effective_user.username
+        )
+
+    caption = f"""
 📄 قرارداد امضا شده جدید
 
 ━━━━━━━━━━━━━━━━━━
@@ -444,151 +509,145 @@ async def receive_contract(
 
 ✅ قرارداد توسط ثبت‌نام‌کننده ارسال شد.
 """
+
+    # PDF
+    if update.message.document:
+
+        await context.bot.send_document(
+            chat_id=ADMIN_ID,
+            document=update.message.document.file_id,
+            caption=caption,
         )
 
-    # اگر تصویر قرارداد ارسال شده باشد
+    # عکس
     elif update.message.photo:
-
-        photo = update.message.photo[-1]
 
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
-            photo=photo.file_id,
-            caption=f"""
-📸 تصویر قرارداد امضا شده جدید
-
-━━━━━━━━━━━━━━━━━━
-
-🆔 کد رهگیری:
-{tracking_code}
-
-👤 نام:
-{full_name}
-
-📱 شماره تماس:
-{phone_number}
-
-🔗 Username:
-{telegram_username}
-
-🆔 Telegram ID:
-{telegram_id}
-
-━━━━━━━━━━━━━━━━━━
-
-✅ قرارداد توسط ثبت‌نام‌کننده ارسال شد.
-"""
+            photo=update.message.photo[-1].file_id,
+            caption=caption,
         )
 
-    # اگر فرمت اشتباه باشد
     else:
 
         await update.message.reply_text(
-            """
-❌ فرمت فایل صحیح نیست.
-
-لطفاً قرارداد امضا شده را به صورت:
-
-📸 عکس
-
-یا
-
-📄 فایل PDF
-
-ارسال کنید.
-"""
+            "❌ لطفاً قرارداد را به صورت عکس یا فایل PDF ارسال کنید."
         )
 
         return
 
-    # پیام موفقیت به کاربر
     await update.message.reply_text(
         """
-✅ قرارداد امضا شده شما با موفقیت دریافت شد.
+✅ قرارداد امضاشده شما با موفقیت دریافت شد.
 
-📌 قرارداد برای بررسی به آموزشگاه پویا فلایت ارسال گردید.
+📌 قرارداد برای آموزشگاه پویا فلایت ارسال شد.
 
-⏳ پس از بررسی، نتیجه از طریق همین ربات به شما اطلاع داده خواهد شد.
+⏳ پس از بررسی با شما تماس خواهیم گرفت.
 
-با تشکر
-✈️ آموزشگاه خلبانی پویا فلایت
+✈️ با تشکر
+آموزشگاه خلبانی پویا فلایت
 """
     )
 
 
 # =========================================================
-# ساخت ConversationHandler ثبت نام
-# =========================================================
-
-# =========================================================
-# ساخت ConversationHandler ثبت نام
+# Conversation Handler
 # =========================================================
 
 register_handler = ConversationHandler(
 
     entry_points=[
+
         MessageHandler(
-            filters.Regex("^✈️ ثبت نام دوره‌ها$"),
+            filters.Regex(
+                "^✈️ ثبت نام دوره‌ها$"
+            ),
             start_register,
         )
+
     ],
 
     states={
 
-        FULL_NAME: [
+        COURSE: [
+
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT
+                & ~filters.COMMAND,
+                course,
+            )
+
+        ],
+
+        FULL_NAME: [
+
+            MessageHandler(
+                filters.TEXT
+                & ~filters.COMMAND,
                 full_name,
             )
+
         ],
 
         PHONE: [
+
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT
+                & ~filters.COMMAND,
                 phone,
             )
+
         ],
 
         NATIONAL_CODE: [
+
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT
+                & ~filters.COMMAND,
                 national_code,
             )
+
         ],
 
         BIRTH_DATE: [
+
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT
+                & ~filters.COMMAND,
                 birth_date,
             )
+
         ],
 
         CITY: [
+
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT
+                & ~filters.COMMAND,
                 city,
             )
-        ],
 
-        COURSE: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                course,
-            )
         ],
 
         EDUCATION: [
+
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT
+                & ~filters.COMMAND,
                 education,
             )
+
         ],
 
     },
 
-    fallbacks=[],
-)
+    fallbacks=[
 
-    fallbacks=[],
+        MessageHandler(
+            filters.Regex("^لغو$"),
+            cancel,
+        )
+
+    ],
+
 )
-```
