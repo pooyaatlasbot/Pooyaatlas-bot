@@ -520,13 +520,17 @@ async def receive_contract(
 # ساخت ConversationHandler ثبت نام
 # =========================================================
 
+# =========================================================
+# ساخت ConversationHandler ثبت نام
+# =========================================================
+
 register_handler = ConversationHandler(
-entry_points=[
-    MessageHandler(
-        filters.Regex("^✈️ ثبت نام دوره‌ها$"),
-        start_register
-    )
-], 
+
+    entry_points=[
+        MessageHandler(
+            filters.Regex("^✈️ ثبت نام دوره‌ها$"),
+            start_register,
+        )
     ],
 
     states={
@@ -534,52 +538,56 @@ entry_points=[
         FULL_NAME: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                full_name
+                full_name,
             )
         ],
 
         PHONE: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                phone
+                phone,
             )
         ],
 
         NATIONAL_CODE: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                national_code
+                national_code,
             )
         ],
 
         BIRTH_DATE: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                birth_date
+                birth_date,
             )
         ],
 
         CITY: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                city
+                city,
             )
         ],
 
         COURSE: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                course
+                course,
             )
         ],
 
         EDUCATION: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                education
+                education,
             )
         ],
+
     },
+
+    fallbacks=[],
+)
 
     fallbacks=[],
 )
