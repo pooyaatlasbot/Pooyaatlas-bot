@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
     ContextTypes,
     ConversationHandler,
@@ -37,9 +37,7 @@ async def start_register(
 
     await update.message.reply_text(
         "لطفاً دوره مورد نظر خود را انتخاب کنید:",
-        reply_markup=__import__(
-            "telegram"
-        ).ReplyKeyboardMarkup(
+        reply_markup=ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True,
             one_time_keyboard=True,
@@ -174,8 +172,7 @@ async def education(
 
     # ساخت کد رهگیری
     tracking_code = (
-        "PF-" +
-        str(uuid.uuid4())[:8].upper()
+        "PF-" + str(uuid.uuid4())[:8].upper()
     )
 
     context.user_data["tracking_code"] = tracking_code
@@ -229,19 +226,14 @@ async def education(
 
     if update.effective_user:
 
-        telegram_name = (
-            update.effective_user.full_name
-        )
+        telegram_name = update.effective_user.full_name
 
-        telegram_id = (
-            update.effective_user.id
-        )
+        telegram_id = update.effective_user.id
 
         if update.effective_user.username:
 
             telegram_username = (
-                "@"
-                + update.effective_user.username
+                "@" + update.effective_user.username
             )
 
     # =====================================================
@@ -264,10 +256,7 @@ async def education(
 
     except Exception as e:
 
-        print(
-            "DATABASE ERROR:",
-            e
-        )
+        print("DATABASE ERROR:", e)
 
         await update.message.reply_text(
             "❌ خطایی در ذخیره اطلاعات ثبت‌نام رخ داد.\n"
@@ -341,10 +330,7 @@ async def education(
 
     except Exception as e:
 
-        print(
-            "ADMIN MESSAGE ERROR:",
-            e
-        )
+        print("ADMIN MESSAGE ERROR:", e)
 
     # =====================================================
     # پیام موفقیت برای متقاضی
@@ -413,10 +399,7 @@ async def education(
 
         except Exception as e:
 
-            print(
-                "CONTRACT ERROR:",
-                e
-            )
+            print("CONTRACT ERROR:", e)
 
     else:
 
@@ -481,8 +464,7 @@ async def receive_contract(
     ):
 
         telegram_username = (
-            "@"
-            + update.effective_user.username
+            "@" + update.effective_user.username
         )
 
     caption = f"""
@@ -557,97 +539,70 @@ async def receive_contract(
 register_handler = ConversationHandler(
 
     entry_points=[
-
         MessageHandler(
-            filters.Regex(
-                "^✈️ ثبت نام دوره‌ها$"
-            ),
+            filters.Regex("^✈️ ثبت نام دوره‌ها$"),
             start_register,
         )
-
     ],
 
     states={
 
         COURSE: [
-
             MessageHandler(
-                filters.TEXT
-                & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND,
                 course,
             )
-
         ],
 
         FULL_NAME: [
-
             MessageHandler(
-                filters.TEXT
-                & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND,
                 full_name,
             )
-
         ],
 
         PHONE: [
-
             MessageHandler(
-                filters.TEXT
-                & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND,
                 phone,
             )
-
         ],
 
         NATIONAL_CODE: [
-
             MessageHandler(
-                filters.TEXT
-                & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND,
                 national_code,
             )
-
         ],
 
         BIRTH_DATE: [
-
             MessageHandler(
-                filters.TEXT
-                & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND,
                 birth_date,
             )
-
         ],
 
         CITY: [
-
             MessageHandler(
-                filters.TEXT
-                & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND,
                 city,
             )
-
         ],
 
         EDUCATION: [
-
             MessageHandler(
-                filters.TEXT
-                & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND,
                 education,
             )
-
         ],
 
     },
 
     fallbacks=[
-
         MessageHandler(
             filters.Regex("^لغو$"),
             cancel,
         )
-
     ],
 
 )
