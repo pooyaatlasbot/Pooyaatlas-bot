@@ -1,87 +1,62 @@
-import os
+import logging
 
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    filters,
-)
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
+from config import BOT_TOKEN
+from database import create_database
+from handlers.admin import admin_handler, error_handler
+from handlers.contract import contract_handler
+from handlers.register import register_handler, receive_contract
 from handlers.start import start, menu
 
-from handlers.register import (
-    register_handler,
-    receive_contract,
+
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    level=logging.INFO,
 )
-
-from handlers.contract import contract_handler
-
-from database import create_database
+logger = logging.getLogger(__name__)
 
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-
-
-def main():
-
+def main() -> None:
     if not BOT_TOKEN:
-        raise ValueError("❌ BOT_TOKEN تنظیم نشده است.")
+        raise RuntimeError("متغیر محیطی BOT_TOKEN تنظیم نشده است.")
 
-    # ساخت دیتابیس
     create_database()
 
-    # ساخت برنامه
-    app = Application.builder().token(BOT_TOKEN).build()
-
-    # ==============================
-    # دستور /start
-    # ==============================
-    app.add_handler(
-        CommandHandler("start", start)
+    app = (
+        Application.builder()
+        .token(BOT_TOKEN)
+        .concurrent_updates(False)
+        .build()
     )
 
-    # ==============================
-    # فرم ثبت نام
-    # ==============================
-    app.add_handler(
-        register_handler
-    )
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("admin", admin_handler))
 
-    # ==============================
-    # دریافت قرارداد امضا شده
-    # باید قبل از menu قرار بگیرد
-    # ==============================
+    app.add_handler(register_handler)
+    app.add_handler(contract_handler)
+
+    # فقط عکس یا PDF؛ فایل‌های دیگر قرارداد تلقی نمی‌شوند.
     app.add_handler(
         MessageHandler(
-            filters.Document.ALL | filters.PHOTO,
+            filters.PHOTO | filters.Document.MimeType("application/pdf"),
             receive_contract,
         )
     )
 
-    # ==============================
-    # قرارداد آموزشی
-    # ==============================
+    # منوی متنی باید پس از ConversationHandlerها باشد.
     app.add_handler(
-        contract_handler
+        MessageHandler(filters.TEXT & ~filters.COMMAND, menu)
     )
 
-    # ==============================
-    # منوی اصلی
-    # باید آخرین MessageHandler باشد
-    # ==============================
-    app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            menu,
-        )
-    )
+    app.add_error_handler(error_handler)
 
-    print(
-        "✈️ Pooya Flight Registration Bot Started Successfully"
+    logger.info("Pooya Flight Registration Bot started.")
+    app.run_polling(
+        allowed_updates=Update.ALL_TYPES,
+        drop_pending_updates=True,
     )
-
-    # اجرای ربات
-    app.run_polling()
 
 
 if __name__ == "__main__":

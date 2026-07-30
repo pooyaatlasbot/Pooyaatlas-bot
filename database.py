@@ -1,57 +1,48 @@
 import sqlite3
-from pathlib import Path
 from typing import Optional
 
 from config import DATABASE_NAME
 
 
-DATABASE_PATH = Path(DATABASE_NAME)
-
-
 def get_connection() -> sqlite3.Connection:
-    """
-    ایجاد اتصال استاندارد به دیتابیس.
-    """
+    DATABASE_NAME.parent.mkdir(parents=True, exist_ok=True)
 
-    DATABASE_PATH.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    connection = sqlite3.connect(
-        str(DATABASE_PATH),
+    conn = sqlite3.connect(
+        str(DATABASE_NAME),
         timeout=30,
     )
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA busy_timeout = 30000")
+    return conn
 
-    connection.row_factory = sqlite3.Row
 
-    connection.execute(
-        "PRAGMA foreign_keys = ON"
-    )
+def _column_names(conn: sqlite3.Connection, table: str) -> set[str]:
+    rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    return {row["name"] for row in rows}
 
-    connection.execute(
-        "PRAGMA busy_timeout = 30000"
-    )
 
-    return connection
+def _add_column_if_missing(
+    conn: sqlite3.Connection,
+    table: str,
+    column: str,
+    definition: str,
+) -> None:
+    if column not in _column_names(conn, table):
+        conn.execute(
+            f"ALTER TABLE {table} ADD COLUMN {column} {definition}"
+        )
 
 
 def create_database() -> None:
-    """
-    ایجاد جدول‌های موردنیاز ربات.
-    """
-
     with get_connection() as conn:
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS students (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-
                 tracking_code TEXT NOT NULL UNIQUE,
-
                 telegram_id INTEGER,
                 telegram_username TEXT,
-
                 full_name TEXT NOT NULL,
                 phone TEXT NOT NULL,
                 national_code TEXT NOT NULL,
@@ -59,51 +50,57 @@ def create_database() -> None:
                 city TEXT,
                 education TEXT,
                 course TEXT NOT NULL,
-
                 has_flight_experience TEXT DEFAULT 'خیر',
-
-                photo TEXT DEFAULT '',
-                national_card TEXT DEFAULT '',
-                birth_certificate TEXT DEFAULT '',
-                education_file TEXT DEFAULT '',
-                medical_file TEXT DEFAULT '',
-
-                signed_contract TEXT DEFAULT '',
+                signed_contract_file_id TEXT DEFAULT '',
+                signed_contract_type TEXT DEFAULT '',
                 contract_received INTEGER DEFAULT 0,
-
+                status TEXT DEFAULT 'ثبت‌نام اولیه',
                 register_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
 
+        # مهاجرت امن برای دیتابیس قدیمی
+        migrations = {
+            "telegram_id": "INTEGER",
+            "telegram_username": "TEXT DEFAULT ''",
+            "signed_contract_file_id": "TEXT DEFAULT ''",
+            "signed_contract_type": "TEXT DEFAULT ''",
+            "contract_received": "INTEGER DEFAULT 0",
+            "status": "TEXT DEFAULT 'ثبت‌نام اولیه'",
+            "updated_at": "TIMESTAMP",
+        }
+        for column, definition in migrations.items():
+            _add_column_if_missing(
+                conn, "students", column, definition
+            )
+
         conn.execute(
             """
-            CREATE INDEX IF NOT EXISTS
-            idx_students_tracking_code
+            CREATE INDEX IF NOT EXISTS idx_students_tracking
             ON students(tracking_code)
             """
         )
-
         conn.execute(
             """
-            CREATE INDEX IF NOT EXISTS
-            idx_students_phone
-            ON students(phone)
+            CREATE INDEX IF NOT EXISTS idx_students_telegram
+            ON students(telegram_id)
             """
         )
-
         conn.execute(
             """
-            CREATE INDEX IF NOT EXISTS
-            idx_students_national_code
+            CREATE INDEX IF NOT EXISTS idx_students_national_code
             ON students(national_code)
             """
         )
 
 
 def add_student(
+    *,
     tracking_code: str,
+    telegram_id: Optional[int],
+    telegram_username: str,
     full_name: str,
     phone: str,
     national_code: str,
@@ -112,101 +109,60 @@ def add_student(
     education: str,
     course: str,
     has_flight_experience: str = "خیر",
-    telegram_id: Optional[int] = None,
-    telegram_username: str = "",
-    photo: str = "",
-    national_card: str = "",
-    birth_certificate: str = "",
-    education_file: str = "",
-    medical_file: str = "",
 ) -> int:
-    """
-    ذخیره اطلاعات هنرجو و برگرداندن شناسه رکورد.
-    """
-
-    try:
-        with get_connection() as conn:
-            cursor = conn.execute(
-                """
-                INSERT INTO students (
-                    tracking_code,
-                    telegram_id,
-                    telegram_username,
-                    full_name,
-                    phone,
-                    national_code,
-                    birth_date,
-                    city,
-                    education,
-                    course,
-                    has_flight_experience,
-                    photo,
-                    national_card,
-                    birth_certificate,
-                    education_file,
-                    medical_file
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    tracking_code,
-                    telegram_id,
-                    telegram_username,
-                    full_name.strip(),
-                    phone.strip(),
-                    national_code.strip(),
-                    birth_date.strip(),
-                    city.strip(),
-                    education.strip(),
-                    course.strip(),
-                    has_flight_experience,
-                    photo,
-                    national_card,
-                    birth_certificate,
-                    education_file,
-                    medical_file,
-                ),
-            )
-
-            return cursor.lastrowid
-
-    except sqlite3.IntegrityError as exc:
-        raise ValueError(
-            "کد رهگیری تکراری است یا اطلاعات معتبر نیست."
-        ) from exc
-
-
-def get_student(
-    tracking_code: str,
-) -> Optional[dict]:
-    """
-    دریافت اطلاعات هنرجو با کد رهگیری.
-    """
-
     with get_connection() as conn:
         cursor = conn.execute(
+            """
+            INSERT INTO students (
+                tracking_code,
+                telegram_id,
+                telegram_username,
+                full_name,
+                phone,
+                national_code,
+                birth_date,
+                city,
+                education,
+                course,
+                has_flight_experience
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                tracking_code,
+                telegram_id,
+                telegram_username,
+                full_name.strip(),
+                phone.strip(),
+                national_code.strip(),
+                birth_date.strip(),
+                city.strip(),
+                education.strip(),
+                course.strip(),
+                has_flight_experience,
+            ),
+        )
+        return int(cursor.lastrowid)
+
+
+def get_student(tracking_code: str) -> Optional[dict]:
+    with get_connection() as conn:
+        row = conn.execute(
             """
             SELECT *
             FROM students
             WHERE tracking_code = ?
             """,
             (tracking_code.strip().upper(),),
-        )
-
-        row = cursor.fetchone()
-
+        ).fetchone()
     return dict(row) if row else None
 
 
-def get_student_by_telegram_id(
+def get_latest_student_by_telegram_id(
     telegram_id: int,
 ) -> Optional[dict]:
-    """
-    دریافت آخرین ثبت‌نام یک کاربر تلگرام.
-    """
-
     with get_connection() as conn:
-        cursor = conn.execute(
+        row = conn.execute(
             """
             SELECT *
             FROM students
@@ -215,57 +171,54 @@ def get_student_by_telegram_id(
             LIMIT 1
             """,
             (telegram_id,),
-        )
-
-        row = cursor.fetchone()
-
+        ).fetchone()
     return dict(row) if row else None
 
 
-def get_all_students() -> list[dict]:
-    """
-    دریافت همه ثبت‌نام‌ها از جدید به قدیم.
-    """
-
+def get_all_students(limit: int = 100) -> list[dict]:
     with get_connection() as conn:
-        cursor = conn.execute(
+        rows = conn.execute(
             """
             SELECT *
             FROM students
             ORDER BY id DESC
-            """
-        )
-
-        rows = cursor.fetchall()
-
-    return [
-        dict(row)
-        for row in rows
-    ]
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+    return [dict(row) for row in rows]
 
 
 def save_signed_contract(
+    *,
     tracking_code: str,
     file_id: str,
+    file_type: str,
 ) -> bool:
-    """
-    ثبت فایل قرارداد امضاشده در دیتابیس.
-    """
-
     with get_connection() as conn:
         cursor = conn.execute(
             """
             UPDATE students
             SET
-                signed_contract = ?,
+                signed_contract_file_id = ?,
+                signed_contract_type = ?,
                 contract_received = 1,
+                status = 'قرارداد دریافت شد',
                 updated_at = CURRENT_TIMESTAMP
             WHERE tracking_code = ?
             """,
             (
                 file_id,
+                file_type,
                 tracking_code.strip().upper(),
             ),
         )
-
         return cursor.rowcount > 0
+
+
+def count_students() -> int:
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS count FROM students"
+        ).fetchone()
+    return int(row["count"])
