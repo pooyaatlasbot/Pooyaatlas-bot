@@ -5,10 +5,23 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
-ADMIN_ID = int(os.getenv("ADMIN_ID", "5679516922"))
+def _parse_admin_ids() -> tuple[int, ...]:
+    raw = os.getenv("ADMIN_IDS", os.getenv("ADMIN_ID", "5679516922"))
+    result = []
+    for item in raw.replace(";", ",").split(","):
+        item = item.strip()
+        if item:
+            result.append(int(item))
+    return tuple(dict.fromkeys(result))
+
+
+ADMIN_IDS = _parse_admin_ids()
+ADMIN_ID = ADMIN_IDS[0] if ADMIN_IDS else 0
 
 SCHOOL_NAME = "آموزشگاه خلبانی پویا فلایت"
 WEBSITE = "https://pooyaflight.ir"
+PAYMENT_URL = os.getenv("PAYMENT_URL", "").strip()
+PAYMENT_AMOUNT_TEXT = os.getenv("PAYMENT_AMOUNT_TEXT", "مبلغ طبق توافق با آموزشگاه").strip()
 PHONE = "09124905605"
 ADDRESS = (
     "کرج، بلوار مطهری شمالی، بین خیابان پیروزی و آزادی، "

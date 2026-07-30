@@ -70,11 +70,23 @@ def create_database() -> None:
             "contract_received": "INTEGER DEFAULT 0",
             "status": "TEXT DEFAULT 'ثبت‌نام اولیه'",
             "updated_at": "TIMESTAMP",
+            "admin_note": "TEXT DEFAULT ''",
         }
         for column, definition in migrations.items():
             _add_column_if_missing(
                 conn, "students", column, definition
             )
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS broadcasts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                admin_id INTEGER NOT NULL,
+                message_text TEXT NOT NULL,
+                success_count INTEGER DEFAULT 0,
+                failed_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """)
 
         conn.execute(
             """
@@ -92,6 +104,31 @@ def create_database() -> None:
             """
             CREATE INDEX IF NOT EXISTS idx_students_national_code
             ON students(national_code)
+            """
+        )
+
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS payments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL,
+                telegram_id INTEGER NOT NULL,
+                receipt_file_id TEXT NOT NULL,
+                receipt_file_type TEXT NOT NULL,
+                original_name TEXT DEFAULT '',
+                mime_type TEXT DEFAULT '',
+                status TEXT DEFAULT 'pending',
+                reviewed_by INTEGER,
+                reviewed_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(student_id) REFERENCES students(id) ON DELETE CASCADE
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_payments_student
+            ON payments(student_id)
             """
         )
 
@@ -222,3 +259,133 @@ def count_students() -> int:
             "SELECT COUNT(*) AS count FROM students"
         ).fetchone()
     return int(row["count"])
+
+
+def search_students(query: str, limit: int = 20) -> list[dict]:
+    like = f"%{query.strip()}%"
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT * FROM students
+            WHERE tracking_code LIKE ? OR full_name LIKE ? OR phone LIKE ?
+               OR national_code LIKE ? OR telegram_username LIKE ?
+            ORDER BY id DESC LIMIT ?
+            """,
+            (like, like, like, like, like, limit),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def update_status(tracking_code: str, status: str) -> bool:
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            UPDATE students SET status = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE tracking_code = ?
+            """,
+            (status, tracking_code.strip().upper()),
+        )
+    return cursor.rowcount > 0
+
+
+def update_admin_note(tracking_code: str, note: str) -> bool:
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            UPDATE students SET admin_note = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE tracking_code = ?
+            """,
+            (note.strip(), tracking_code.strip().upper()),
+        )
+    return cursor.rowcount > 0
+
+
+def save_broadcast(
+    admin_id: int,
+    message_text: str,
+    success_count: int,
+    failed_count: int,
+) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO broadcasts (
+                admin_id, message_text, success_count, failed_count
+            ) VALUES (?, ?, ?, ?)
+            """,
+            (admin_id, message_text, success_count, failed_count),
+        )
+
+
+def create_payment_receipt(
+    *,
+    student_id: int,
+    telegram_id: int,
+    file_id: str,
+    file_type: str,
+    original_name: str = "",
+    mime_type: str = "",
+) -> int:
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO payments (
+                student_id, telegram_id, receipt_file_id, receipt_file_type,
+                original_name, mime_type
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (student_id, telegram_id, file_id, file_type, original_name, mime_type),
+        )
+        conn.execute(
+            """
+            UPDATE students SET status = 'رسید پرداخت در انتظار بررسی',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (student_id,),
+        )
+        return int(cursor.lastrowid)
+
+
+def get_payment(payment_id: int) -> Optional[dict]:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT p.*, s.tracking_code, s.full_name, s.phone, s.course
+            FROM payments p
+            JOIN students s ON s.id = p.student_id
+            WHERE p.id = ?
+            """,
+            (payment_id,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def review_payment(payment_id: int, status: str, admin_id: int) -> bool:
+    if status not in {'approved', 'rejected'}:
+        raise ValueError('Invalid payment status')
+    student_status = 'پرداخت تأیید شد' if status == 'approved' else 'پرداخت رد شد'
+    with get_connection() as conn:
+        payment = conn.execute(
+            'SELECT student_id, status FROM payments WHERE id = ?',
+            (payment_id,),
+        ).fetchone()
+        if not payment or payment['status'] != 'pending':
+            return False
+        cursor = conn.execute(
+            """
+            UPDATE payments SET status = ?, reviewed_by = ?,
+                reviewed_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND status = 'pending'
+            """,
+            (status, admin_id, payment_id),
+        )
+        if cursor.rowcount:
+            conn.execute(
+                """
+                UPDATE students SET status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (student_status, payment['student_id']),
+            )
+        return cursor.rowcount > 0
